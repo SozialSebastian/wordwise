@@ -362,6 +362,40 @@ try doing (ausprobieren) – try to do (versuchen)</div>`,
       { t: 'mc', q: '„Ich bin seit Montag hier.“', o: ['I have been here since Monday.', 'I am here since Monday.', 'I am here for Monday.'], a: 0, ex: '„seit“ mit Bezug bis jetzt → Present Perfect.' }
     ]
   }
+  ,{
+    id: 'finance-articles', title: 'Wirtschaftsenglisch: Finanzartikel', level: 'B2',
+    explain: `
+<p>Wendungen aus Finanz- und Wirtschaftsnachrichten (z. B. Bloomberg), die oft missverstanden werden.</p>
+<table class="gt"><tr><th>Englisch</th><th>Bedeutung</th></tr>
+<tr><td>gross revenue</td><td>Bruttoumsatz – voller Betrag, den der Kunde zahlt</td></tr>
+<tr><td>net revenue</td><td>Nettoumsatz – nur der eigene Anteil, z. B. nach Abzug der Partnerprovision</td></tr>
+<tr><td>annualized revenue / run rate (ARR)</td><td>auf ein Jahr hochgerechneter Umsatz – keine Standard-Kennzahl</td></tr>
+<tr><td>(not) apples to apples</td><td>(nicht) vergleichbar – „Äpfel mit Birnen“</td></tr>
+<tr><td>a deal falls through</td><td>ein Geschäft platzt (nicht: einbrechen → <i>slump, plunge</i>)</td></tr>
+<tr><td>be liable for / on the hook for</td><td>haften für</td></tr>
+<tr><td>mitigate a risk</td><td>ein Risiko verringern (nicht verwechseln mit <i>migrate/immigrate</i>)</td></tr>
+<tr><td>hold money in escrow</td><td>Geld treuhänderisch hinterlegen</td></tr>
+<tr><td>capital requirements</td><td>Eigenkapitalanforderungen an Banken</td></tr>
+<tr><td>IPO, offering price, listing, debut</td><td>Börsengang, Ausgabepreis, Notierung, erster Handelstag</td></tr></table>
+<div class="tip">Feste Präpositionen: <b>grapple with</b>, <b>scoff at</b>, <b>weigh in on</b>, <b>lag behind</b>, <b>on the cusp of</b>.</div>`,
+    items: [
+      { t: 'mc', q: 'A company that books the full amount a customer pays, including the partner\'s cut, reports ___ revenue.', o: ['gross', 'net', 'annual'], a: 0, ex: 'gross = brutto, voller Betrag. Der Anteil des Partners wird dann als Kosten gebucht.' },
+      { t: 'mc', q: 'A company that books only its own share after the partner\'s cut reports ___ revenue.', o: ['net', 'gross', 'lofty'], a: 0, ex: 'net = netto, nur der eigene Anteil.' },
+      { t: 'mc', q: 'The buyer withdrew, so the deal ___ at the last minute.', o: ['fell through', 'fell down', 'fell behind'], a: 0, ex: 'fall through = scheitern, platzen.' },
+      { t: 'mc', q: 'After the scandal, sales ___ by 30 percent.', o: ['slumped', 'fell through', 'followed suit'], a: 0, ex: 'Umsätze brechen ein → slump / plunge. „fall through“ gilt nur für Pläne und Deals.' },
+      { t: 'gap', q: 'The two revenue figures are not apples to ___, so you cannot compare them directly.', a: ['apples'], ex: '„not apples to apples“ = Äpfel mit Birnen.' },
+      { t: 'mc', q: 'New safety rules are meant to ___ the risks of the technology.', o: ['mitigate', 'migrate', 'immigrate'], a: 0, ex: 'mitigate = mildern, verringern.' },
+      { t: 'mc', q: 'If an AI system goes rogue, who will be ___ for the damage?', o: ['liable', 'likely', 'reliable'], a: 0, ex: 'liable for = haftbar für.' },
+      { t: 'gap', q: 'Investors are still ___ (grapple) with the question of how to value these risks.', a: ['grappling'], ex: 'grapple with = sich herumschlagen mit; hier Present Continuous.' },
+      { t: 'mc', q: 'When the market leader cut its prices, its competitors soon ___.', o: ['followed suit', 'followed up', 'fell through'], a: 0, ex: 'follow suit = nachziehen, dem Beispiel folgen.' },
+      { t: 'mc', q: 'Investors faced a binary choice: accept that the company could be fully on the hook for a disaster – or ___.', o: ['not invest at all', 'invest at a discount', 'buy insurance'], a: 0, ex: 'Binär = nur zwei Möglichkeiten. Weil sich das Risiko nicht beziffern lässt, kann man keinen Preisabschlag einrechnen.' },
+      { t: 'err', s: 'At first, many experts scoffed [about] the idea.', fix: ['at'], ex: 'scoff at sth = über etwas spotten.' },
+      { t: 'err', s: 'The new rules should help to [immigrate] the risks.', fix: ['mitigate'], ex: 'mitigate = verringern; immigrate = einwandern.' },
+      { t: 'trans', q: 'Übersetze ins Englische (mit „lag“).', s: 'Die Firma hinkt ihren Konkurrenten hinterher.', hint: 'The company …', a: ['The company is lagging behind its competitors.', 'The company lags behind its competitors.', 'The company is lagging behind its rivals.', 'The company lags behind its rivals.'], ex: 'lag behind = hinterherhinken.' },
+      { t: 'order', de: 'Die Firma steht kurz vor ihrem Börsengang.', s: 'The company is on the cusp of its stock market debut.' },
+      { t: 'order', de: 'Das Geld wird treuhänderisch verwahrt, bis der Deal abgeschlossen ist.', s: 'The money is held in escrow until the deal is completed.' }
+    ]
+  }
 ];
 
 /* Startpaket – nützliche Wörter B2/C1. ex enthält das Wort, damit Lückentexte funktionieren. */
@@ -420,4 +454,32 @@ const STARTER = [
   ['bear in mind', 'bedenken, berücksichtigen', 'verb', 'Bear in mind that the shops close early on Saturdays.'],
   ['be supposed to', 'sollen (Erwartung, Regel)', 'verb', 'You are supposed to be at work by nine.'],
   ['make up your mind', 'sich entscheiden', 'verb', 'You need to make up your mind soon.']
+];
+
+/* Vokabeln aus dem Chat (Bloomberg-Artikel, 26.10.2026). Werden beim Öffnen automatisch übernommen. */
+const CHAT_WORDS = [
+  ['revenue', 'Umsatz, Erlöse', 'noun', 'The company\'s revenue rose by 12 percent last year.'],
+  ['gross amount', 'Bruttobetrag', 'noun', 'The gross amount on the invoice includes VAT.'],
+  ['apparent', 'offensichtlich, scheinbar', 'adjective', 'It soon became apparent that the plan would not work.'],
+  ['heightened', 'erhöht, verstärkt, gesteigert', 'adjective', 'There is heightened security at the airport this week.'],
+  ['outlet', 'Medium (news outlet), Verkaufsstelle, Ventil', 'noun', 'Several news outlets reported on the merger.'],
+  ['attempt', 'Versuch; versuchen', 'noun', 'All attempts to reach an agreement have failed so far.'],
+  ['latitude', 'Breitengrad; Spielraum', 'noun', 'Hamburg lies at a latitude of about 53 degrees north.'],
+  ['stump', 'ratlos machen, verblüffen', 'verb', 'The last question on the exam stumped most students.'],
+  ['lag behind', 'hinterherhinken, zurückliegen', 'verb', 'The company is lagging behind its main competitor.'],
+  ['lofty', 'hochgesteckt, überzogen', 'adjective', 'Investors are questioning the lofty valuations of tech start-ups.'],
+  ['fall through', 'scheitern, platzen (Geschäft)', 'verb', 'The deal could fall through at the last minute.'],
+  ['offset', 'ausgleichen, kompensieren', 'verb', 'Higher prices could offset the drop in sales.'],
+  ['on the cusp of', 'kurz vor, an der Schwelle zu', 'phrase', 'The company is on the cusp of going public.'],
+  ['follow suit', 'nachziehen, dem Beispiel folgen', 'verb', 'When one bank cut its rates, the others soon followed suit.'],
+  ['at a fast clip', 'in schnellem Tempo, rasant', 'phrase', 'Sales have been growing at a fast clip this year.'],
+  ['grapple with', 'sich herumschlagen mit, ringen mit', 'verb', 'Economists are still grappling with the effects of the crisis.'],
+  ['conundrum', 'Rätsel, verzwicktes Problem', 'noun', 'Valuing the company is a real conundrum for investors.'],
+  ['weigh in on', 'sich (zu etw.) äußern', 'verb', 'Several experts weighed in on the debate.'],
+  ['scoff at', 'spotten über, abtun', 'verb', 'Critics scoffed at the idea at first.'],
+  ['escrow', 'Treuhand, Treuhandkonto', 'noun', 'The money is held in escrow until the deal is completed.'],
+  ['mitigate', 'mildern, verringern (Risiken)', 'verb', 'Banks hold extra capital to mitigate the risk of losses.'],
+  ['moat', 'Wettbewerbsvorteil (wörtl. Burggraben)', 'noun', 'A strong brand can create a competitive moat.'],
+  ['be on the hook for', 'haften für, geradestehen müssen für', 'verb', 'Shareholders were on the hook for the cleanup costs.'],
+  ['go rogue', 'außer Kontrolle geraten, eigenmächtig handeln', 'verb', 'What happens if an AI system goes rogue?']
 ];

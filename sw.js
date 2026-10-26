@@ -1,5 +1,5 @@
 /* Wordwise Service Worker – App offline verfügbar, Updates beim nächsten Start */
-const CACHE = 'wordwise-v1';
+const CACHE = 'wordwise-v2';
 const SHELL = [
   './', './index.html', './styles.css', './js/data.js', './js/app.js', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'
@@ -19,15 +19,11 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== location.origin) return; // Wörterbuch & Übersetzung immer live
-  // Stale-while-revalidate: sofort aus dem Cache, im Hintergrund aktualisieren
+  // Network-first: online immer die neueste Version, offline aus dem Cache
   e.respondWith(
-    caches.open(CACHE).then(async (cache) => {
-      const cached = await cache.match(e.request, { ignoreSearch: true });
-      const network = fetch(e.request).then((res) => {
-        if (res && res.ok) cache.put(e.request, res.clone());
-        return res;
-      }).catch(() => cached);
-      return cached || network;
-    })
+    fetch(e.request).then((res) => {
+      if (res && res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(e.request, copy)); }
+      return res;
+    }).catch(() => caches.match(e.request, { ignoreSearch: true }))
   );
 });

@@ -637,7 +637,7 @@ function renderSettings() {
       ${!S.starterAdded ? `<button class="btn ghost" id="s-starter" style="margin-top:8px;padding-left:0">Startpaket hinzufügen</button>` : ''}
     </div>
     <button class="btn danger block" id="s-reset" style="margin-top:8px">Alles zurücksetzen</button>
-    <p class="tiny" style="text-align:center;margin-top:24px">Wordwise · Version 1.0</p>
+    <p class="tiny" style="text-align:center;margin-top:24px">Wordwise · Version 1.1</p>
   </div>`;
 
   $$('[data-acc]').forEach((b) => b.onclick = () => { st.accent = b.dataset.acc; save(); renderSettings(); });
@@ -1163,6 +1163,24 @@ function renderSummary() {
 /* =========================================================
    Start
    ========================================================= */
+/* Neue Vokabeln aus data.js (CHAT_WORDS) einmalig übernehmen – gelöschte kommen nicht zurück */
+function importChatWords() {
+  if (typeof CHAT_WORDS === 'undefined') return;
+  S.imported = S.imported || [];
+  const done = new Set(S.imported.map((x) => x.toLowerCase()));
+  const have = new Set(S.vocab.map((v) => v.en.toLowerCase()));
+  let n = 0;
+  for (const [en, de, pos, ex] of CHAT_WORDS) {
+    const k = en.toLowerCase();
+    if (done.has(k)) continue;
+    S.imported.push(en);
+    if (have.has(k)) continue;
+    S.vocab.push(newVocab({ en, de, pos, ex })); n++;
+  }
+  save();
+  if (n) setTimeout(() => toast(`${n} neue Vokabeln übernommen – unter „Neue Wörter lernen“`, 3500), 400);
+}
+importChatWords();
 render();
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
