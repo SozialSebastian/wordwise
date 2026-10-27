@@ -637,7 +637,7 @@ function renderSettings() {
       ${!S.starterAdded ? `<button class="btn ghost" id="s-starter" style="margin-top:8px;padding-left:0">Startpaket hinzufügen</button>` : ''}
     </div>
     <button class="btn danger block" id="s-reset" style="margin-top:8px">Alles zurücksetzen</button>
-    <p class="tiny" style="text-align:center;margin-top:24px">Wordwise · Version 1.1</p>
+    <p class="tiny" style="text-align:center;margin-top:24px">Wordwise · Version 1.2</p>
   </div>`;
 
   $$('[data-acc]').forEach((b) => b.onclick = () => { st.accent = b.dataset.acc; save(); renderSettings(); });
@@ -837,6 +837,7 @@ function finish(task, result, { solution = '', why = '', speakText = '' } = {}) 
     if (task.kind === 'g') gradeGrammar(task.topic, task.idx, ok);
     else if (task.v && !L.graded.has(task.v.id)) { gradeVocab(task.v, ok); L.graded.add(task.v.id); }
     if (!ok) {
+      if (task.kind === 'g') { L.wrongTopics = L.wrongTopics || []; if (!L.wrongTopics.includes(task.topic)) L.wrongTopics.push(task.topic); }
       addMistake(mistakeLabel(task), task.v && task.kind !== 'v_dict' ? esc(task.v.en) : solution);
       L.tasks.push({ ...task, retry: true }); // am Ende noch einmal
     }
@@ -848,10 +849,13 @@ function finish(task, result, { solution = '', why = '', speakText = '' } = {}) 
   f.innerHTML = `<div class="inner">
     <div class="fb-title">${ok ? ICON.check : ICON.x} ${title}</div>
     <div class="fb-text">${(!ok || result === 'typo') && solution ? `<div>Lösung: <span class="sol">${solution}</span></div>` : ''}${why ? `<div class="why">${why}</div>` : ''}
-    ${speakText ? `<button class="speak" id="fb-speak" style="margin-top:8px">${ICON.speaker} Anhören</button>` : ''}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+    ${speakText ? `<button class="speak" id="fb-speak">${ICON.speaker} Anhören</button>` : ''}
+    ${task.kind === 'g' ? `<button class="speak" id="fb-explain">${ICON.grammar.replace('<svg ', '<svg width="20" height="20" ')} Erklärung</button>` : ''}</div></div>
     <button class="btn block" id="l-next">Weiter</button></div>`;
   $('#l-next').onclick = next;
   const sp = $('#fb-speak'); if (sp) sp.onclick = () => speak(speakText);
+  const fe = $('#fb-explain'); if (fe) fe.onclick = () => showExplanation(task.topic);
   setTimeout(() => { const b = $('#l-next'); b && b.focus(); }, 50);
 }
 function addMistake(q, a) {
@@ -1139,6 +1143,19 @@ function renderErr(task, it, tag, why) {
   });
 }
 
+/* Erklärung eines Grammatikthemas als Overlay – die Lektion bleibt darunter offen */
+function showExplanation(topicId) {
+  const t = GRAMMAR.find((x) => x.id === topicId);
+  if (!t) return;
+  const { el, close } = sheet(`
+    <div class="sheet-head"><h2>${esc(t.title)}</h2><button class="btn ghost" id="x-close">Zurück</button></div>
+    <p class="sub" style="margin:0 0 12px"><span class="badge ${t.level}">${t.level}</span></p>
+    <div class="explain">${t.explain}</div>
+    <button class="btn block" id="x-back" style="margin-top:16px">Zurück zur Übung</button>`);
+  $('#x-close', el).onclick = close;
+  $('#x-back', el).onclick = close;
+}
+
 /* ---------- Abschluss ---------- */
 function renderSummary() {
   $('#l-prog').style.width = '100%';
@@ -1148,6 +1165,7 @@ function renderSummary() {
     <div class="big-number">${pct}%</div>
     <h2>Lektion abgeschlossen</h2>
     <p class="muted">${L.ok} von ${L.answered} Aufgaben beim ersten Versuch richtig.</p>
+    ${L.wrongTopics && L.wrongTopics.length ? `<div class="mistakes"><h2 class="section" style="margin-left:0">Erklärungen nachlesen</h2>${L.wrongTopics.map((id) => { const t = GRAMMAR.find((x) => x.id === id); return `<button class="list-btn" data-explain="${id}"><div class="grow"><div class="t">${esc(t.title)}</div></div>${ICON.chev}</button>`; }).join('')}</div>` : ''}
     ${L.mistakes.length ? `<div class="mistakes"><h2 class="section" style="margin-left:0">Zum Merken</h2>${L.mistakes.map((m) => `<div class="mistake"><div class="q">${m.q}</div><div class="a">${m.a}</div></div>`).join('')}</div>` : ''}
   </div>`;
   const f = foot(); f.className = 'lesson-foot';
@@ -1155,6 +1173,7 @@ function renderSummary() {
   f.innerHTML = `<div class="inner"><div class="btn-row" style="margin-top:0">
     ${again ? `<button class="btn secondary" id="l-again">${L.type === 'review' ? `Weiter wiederholen (${due})` : L.type === 'new' ? 'Weitere neue Wörter' : 'Noch eine Runde'}</button>` : ''}
     <button class="btn" id="l-done">Fertig</button></div></div>`;
+  $$('[data-explain]').forEach((b) => b.onclick = () => showExplanation(b.dataset.explain));
   $('#l-done').onclick = () => endLesson();
   const a = $('#l-again');
   if (a) a.onclick = () => { const { type, arg } = L; endLesson(); startLesson(type, arg); };
