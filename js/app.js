@@ -636,8 +636,13 @@ function renderSettings() {
       <input type="file" id="s-file" accept="application/json,.json" class="hidden">
       ${!S.starterAdded ? `<button class="btn ghost" id="s-starter" style="margin-top:8px;padding-left:0">Startpaket hinzufügen</button>` : ''}
     </div>
+    <h2 class="section">Fehlerprotokoll</h2>
+    <div class="card">
+      <p style="margin-bottom:12px">${(S.errors || []).length ? `${S.errors.length} falsche Antworten gespeichert – mit deiner Eingabe. Sie sind im Backup enthalten.` : 'Noch keine Fehler gespeichert. Falsche Antworten werden ab jetzt mit deiner Eingabe festgehalten.'}</p>
+      ${(S.errors || []).length ? `<button class="btn secondary block" id="s-errors">Fehler ansehen</button>` : ''}
+    </div>
     <button class="btn danger block" id="s-reset" style="margin-top:8px">Alles zurücksetzen</button>
-    <p class="tiny" style="text-align:center;margin-top:24px">Wordwise · Version 1.2</p>
+    <p class="tiny" style="text-align:center;margin-top:24px">Wordwise · Version 1.3</p>
   </div>`;
 
   $$('[data-acc]').forEach((b) => b.onclick = () => { st.accent = b.dataset.acc; save(); renderSettings(); });
@@ -651,6 +656,7 @@ function renderSettings() {
   });
   $('#s-email').onchange = (e) => { st.email = e.target.value.trim(); save(); toast('Gespeichert'); };
   $('#s-export').onclick = exportData;
+  const se = $('#s-errors'); if (se) se.onclick = openErrorSheet;
   $('#s-import').onclick = () => $('#s-file').click();
   $('#s-file').onchange = importData;
   const sst = $('#s-starter'); if (sst) sst.onclick = () => { addStarter(); renderSettings(); };
@@ -658,6 +664,20 @@ function renderSettings() {
     if (!confirm('Wirklich alle Vokabeln, Fortschritte und Einstellungen löschen?')) return;
     localStorage.removeItem(KEY); S = load(); UI.tab = 'home'; render(); toast('Zurückgesetzt');
   };
+}
+
+function openErrorSheet() {
+  const list = [...(S.errors || [])].reverse();
+  const { el, close } = sheet(`
+    <div class="sheet-head"><h2>Meine Fehler</h2><button class="btn ghost" id="e-close">Schließen</button></div>
+    ${list.map((e) => `<div class="mistake">
+      <div class="tiny">${new Date(e.d).toLocaleDateString('de-DE', { day: 'numeric', month: 'short' })} · ${esc(e.area === 'grammar' ? e.title : 'Vokabel')} · ${esc(e.type || '')}${e.typo ? ' · Tippfehler' : ''}</div>
+      <div class="q">${esc(e.area === 'grammar' ? e.q : `${e.word} – ${e.de}`)}</div>
+      <div class="given">Deine Antwort: ${esc(e.given || '–')}</div>
+      <div class="a">Richtig: ${esc(e.expected)}</div></div>`).join('')}
+    <button class="btn danger block" id="e-clear" style="margin-top:12px">Protokoll leeren</button>`);
+  $('#e-close', el).onclick = close;
+  $('#e-clear', el).onclick = () => { if (!confirm('Fehlerprotokoll leeren?')) return; S.errors = []; save(); close(); renderSettings(); };
 }
 
 async function exportData() {
@@ -828,7 +848,7 @@ function renderTask() {
 }
 
 /* Ergebnis einer Aufgabe verbuchen und Feedback zeigen */
-function finish(task, result, { solution = '', why = '', speakText = '' } = {}) {
+function finish(task, result, { solution = '', why = '', speakText = '', given = '' } = {}) {
   const ok = !!result;
   const first = !task.retry;
   if (first) {
@@ -836,9 +856,10 @@ function finish(task, result, { solution = '', why = '', speakText = '' } = {}) 
     logAnswer(ok);
     if (task.kind === 'g') gradeGrammar(task.topic, task.idx, ok);
     else if (task.v && !L.graded.has(task.v.id)) { gradeVocab(task.v, ok); L.graded.add(task.v.id); }
+    if (!ok || result === 'typo') recordError(task, given, solution, result);
     if (!ok) {
       if (task.kind === 'g') { L.wrongTopics = L.wrongTopics || []; if (!L.wrongTopics.includes(task.topic)) L.wrongTopics.push(task.topic); }
-      addMistake(mistakeLabel(task), task.v && task.kind !== 'v_dict' ? esc(task.v.en) : solution);
+      addMistake(mistakeLabel(task), task.v && task.kind !== 'v_dict' ? esc(task.v.en) : solution, given);
       L.tasks.push({ ...task, retry: true }); // am Ende noch einmal
     }
     save();
@@ -858,8 +879,26 @@ function finish(task, result, { solution = '', why = '', speakText = '' } = {}) 
   const fe = $('#fb-explain'); if (fe) fe.onclick = () => showExplanation(task.topic);
   setTimeout(() => { const b = $('#l-next'); b && b.focus(); }, 50);
 }
-function addMistake(q, a) {
-  if (!L.mistakes.some((m) => m.q === q && m.a === a)) L.mistakes.push({ q, a });
+function addMistake(q, a, given) {
+  if (!L.mistakes.some((m) => m.q === q && m.a === a)) L.mistakes.push({ q, a, given: given || '' });
+}
+const plain = (h) => String(h || '').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, ' ').trim();
+const KIND_LABEL = { gap: 'Lücke', mc: 'Auswahl', err: 'Fehler finden', order: 'Satz bauen', trans: 'Umformen',
+  v_mc_ende: 'Bedeutung wählen', v_mc_deen: 'EN-Wort wählen', v_type: 'Übersetzen', v_cloze_mc: 'Lückentext (Auswahl)', v_cloze_type: 'Lückentext',
+  v_def: 'Definition', v_listen: 'Hören', v_dict: 'Diktat', v_order: 'Satz bauen', v_match: 'Paare finden' };
+/* Fehlerprotokoll: falsche Eingaben dauerhaft speichern (für Backup/Auswertung) */
+function recordError(task, given, solution, result) {
+  S.errors = S.errors || [];
+  const e = { d: new Date().toISOString(), given: String(given ?? ''), expected: plain(solution), typo: result === 'typo' || undefined };
+  if (task.kind === 'g') {
+    const t = GRAMMAR.find((x) => x.id === task.topic), it = t.items[task.idx];
+    Object.assign(e, { area: 'grammar', topic: t.id, title: t.title, idx: task.idx, type: KIND_LABEL[it.t] || it.t, q: it.q || it.s || it.de || '' });
+    if (it.t === 'trans' || it.t === 'order') e.q = (it.q && it.t === 'trans' ? it.q + ': ' : '') + (it.s && it.t === 'trans' ? it.s : it.de);
+  } else if (task.v) {
+    Object.assign(e, { area: 'vocab', word: task.v.en, de: task.v.de, type: KIND_LABEL[task.kind] || task.kind });
+  }
+  S.errors.push(e);
+  if (S.errors.length > 500) S.errors = S.errors.slice(-500);
 }
 function mistakeLabel(task) {
   if (task.kind === 'g') {
@@ -881,7 +920,7 @@ function renderMC({ kind, prompt, promptClass = '', hint = '', options, correct,
     $$('.opt', body()).forEach((x) => { x.disabled = true; if (+x.dataset.i === correct) x.classList.add('ok'); });
     if (!ok) b.classList.add('bad');
     if (onAfter) onAfter(ok);
-    finish(task, ok, { solution: solution ?? esc(options[correct]), why, speakText });
+    finish(task, ok, { solution: solution ?? esc(options[correct]), why, speakText, given: options[i] });
   });
 }
 
@@ -900,7 +939,7 @@ function renderTyped({ kind, prompt, promptClass = '', hint = '', answers, tol =
     inp.disabled = true; inp.blur();
     const r = checkAnswer(inp.value, answers, { tol, stripTo });
     inp.style.borderColor = r ? 'var(--ok)' : 'var(--bad)';
-    finish(task, r, { solution: solution ?? esc(answers[0]), why, speakText });
+    finish(task, r, { solution: solution ?? esc(answers[0]), why, speakText, given: inp.value.trim() });
   }
 }
 
@@ -1013,7 +1052,7 @@ function renderIntro(v) {
 function renderMatch(task) {
   const vs = task.vs;
   const left = shuffle(vs), right = shuffle(vs);
-  const errors = new Set();
+  const errors = new Set(), wrongPairs = {};
   let selL = null, selR = null, matched = 0;
   body().innerHTML = `<div class="kind">Paare finden</div><p class="hint">Tippe jeweils ein englisches und das passende deutsche Wort an.</p>
     <div class="match"><div class="col">${left.map((v) => `<button class="opt" data-l="${v.id}">${esc(v.en)}</button>`).join('')}</div>
@@ -1029,6 +1068,8 @@ function renderMatch(task) {
       matched++;
     } else {
       errors.add(selL); errors.add(selR);
+      const rv = vs.find((x) => x.id === selR);
+      (wrongPairs[selL] = wrongPairs[selL] || []).push(altList(rv.de)[0] || rv.de);
       [bl, br].forEach((b) => { b.classList.remove('sel'); b.classList.add('flash'); setTimeout(() => b.classList.remove('flash'), 450); });
     }
     selL = selR = null;
@@ -1039,7 +1080,11 @@ function renderMatch(task) {
         const ok = !errors.has(v.id);
         logAnswer(ok);
         if (!L.graded.has(v.id)) { gradeVocab(v, ok); L.graded.add(v.id); }
-        if (!ok) addMistake(esc(v.de), esc(v.en));
+        if (!ok) {
+          const g = (wrongPairs[v.id] || []).join(', ');
+          addMistake(esc(v.de), esc(v.en), g ? `${v.en} → ${g}` : '');
+          if (g) recordError({ kind: 'v_match', v }, `${v.en} → ${g}`, `${v.en} → ${v.de}`, false);
+        }
       });
       save();
       const f = foot(); f.className = 'lesson-foot ' + (allOk ? 'ok' : 'bad');
@@ -1074,7 +1119,7 @@ function renderOrder({ kind, prompt, sentence, task, why }) {
     const built = chosen.map((i) => words[i]).join(' ');
     const ok = norm(built) === norm(sentence);
     $$('#ans-line .tok').forEach((b) => b.classList.add(ok ? 'ok' : 'bad'));
-    finish(task, ok, { solution: esc(sentence), why, speakText: sentence });
+    finish(task, ok, { solution: esc(sentence), why, speakText: sentence, given: built });
   }
 }
 
@@ -1107,7 +1152,10 @@ function renderErr(task, it, tag, why) {
   it.s.split(/(\[[^\]]+\])/).forEach((part) => {
     if (!part) return;
     const wrong = part.startsWith('[');
-    part.replace(/[[\]]/g, '').split(/\s+/).filter(Boolean).forEach((w) => toks.push({ w, wrong }));
+    part.replace(/[[\]]/g, '').split(/\s+/).filter(Boolean).forEach((w) => {
+      if (/^[.,!?;:]+$/.test(w) && toks.length) toks[toks.length - 1].w += w; // Satzzeichen ans vorige Wort
+      else toks.push({ w, wrong });
+    });
   });
   const wrongText = it.s.match(/\[([^\]]+)\]/)[1];
   const fixed = it.s.replace(/\[[^\]]+\]/, `<b>${esc(it.fix[0])}</b>`);
@@ -1122,7 +1170,7 @@ function renderErr(task, it, tag, why) {
     $$('.sentence-tokens .tok').forEach((x) => { if (toks[+x.dataset.i].wrong) x.classList.add(t.wrong ? 'ok' : 'sel'); });
     if (!t.wrong) {
       b.classList.add('bad');
-      finish(task, false, { solution: fixed, why: `Falsch war: „${esc(wrongText)}“. ${why}`, speakText: fixedPlain });
+      finish(task, false, { solution: fixed, why: `Falsch war: „${esc(wrongText)}“. ${why}`, speakText: fixedPlain, given: `als Fehler markiert: „${t.w}“` });
       return;
     }
     $('#err-step2').innerHTML = `<p class="hint" style="margin:14px 0 0">Richtig erkannt! Wie heißt es korrekt statt <b>„${esc(wrongText)}“</b>?</p>
@@ -1138,7 +1186,7 @@ function renderErr(task, it, tag, why) {
       inp.disabled = true;
       const r = checkAnswer(inp.value, it.fix);
       inp.style.borderColor = r ? 'var(--ok)' : 'var(--bad)';
-      finish(task, r, { solution: fixed, why, speakText: fixedPlain });
+      finish(task, r, { solution: fixed, why, speakText: fixedPlain, given: `Korrektur: „${inp.value.trim()}“` });
     }
   });
 }
@@ -1166,7 +1214,7 @@ function renderSummary() {
     <h2>Lektion abgeschlossen</h2>
     <p class="muted">${L.ok} von ${L.answered} Aufgaben beim ersten Versuch richtig.</p>
     ${L.wrongTopics && L.wrongTopics.length ? `<div class="mistakes"><h2 class="section" style="margin-left:0">Erklärungen nachlesen</h2>${L.wrongTopics.map((id) => { const t = GRAMMAR.find((x) => x.id === id); return `<button class="list-btn" data-explain="${id}"><div class="grow"><div class="t">${esc(t.title)}</div></div>${ICON.chev}</button>`; }).join('')}</div>` : ''}
-    ${L.mistakes.length ? `<div class="mistakes"><h2 class="section" style="margin-left:0">Zum Merken</h2>${L.mistakes.map((m) => `<div class="mistake"><div class="q">${m.q}</div><div class="a">${m.a}</div></div>`).join('')}</div>` : ''}
+    ${L.mistakes.length ? `<div class="mistakes"><h2 class="section" style="margin-left:0">Zum Merken</h2>${L.mistakes.map((m) => `<div class="mistake"><div class="q">${m.q}</div>${m.given ? `<div class="given">Deine Antwort: ${esc(m.given)}</div>` : ''}<div class="a">${m.a}</div></div>`).join('')}</div>` : ''}
   </div>`;
   const f = foot(); f.className = 'lesson-foot';
   const again = L.type === 'review' ? due > 0 : L.type === 'new' ? newVocabList().length > 0 : true;

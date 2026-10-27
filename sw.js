@@ -1,5 +1,5 @@
 /* Wordwise Service Worker – App offline verfügbar, Updates beim nächsten Start */
-const CACHE = 'wordwise-v3';
+const CACHE = 'wordwise-v4';
 const SHELL = [
   './', './index.html', './styles.css', './js/data.js', './js/app.js', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'

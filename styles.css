@@ -340,6 +340,7 @@ textarea.answer-input { min-height: 96px; resize: none; }
 .mistake { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; margin-bottom: 8px; font-size: 15px; }
 .mistake .q { color: var(--ink-2); }
 .mistake .a { font-weight: 600; margin-top: 2px; }
+.mistake .given { color: var(--bad); margin-top: 2px; }
 
 .toast {
   position: fixed; left: 50%; top: calc(var(--safe-t) + 14px); transform: translateX(-50%);
