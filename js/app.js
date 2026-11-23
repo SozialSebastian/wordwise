@@ -662,7 +662,7 @@ function renderSettings() {
       ${(S.errors || []).length ? `<button class="btn secondary block" id="s-errors">Fehler ansehen</button>` : ''}
     </div>
     <button class="btn danger block" id="s-reset" style="margin-top:8px">Alles zurücksetzen</button>
-    <p class="tiny" style="text-align:center;margin-top:24px">Wordwise · Version 1.4</p>
+    <p class="tiny" style="text-align:center;margin-top:24px">Wordwise · Version 1.5</p>
   </div>`;
 
   $$('[data-acc]').forEach((b) => b.onclick = () => { st.accent = b.dataset.acc; save(); renderSettings(); });

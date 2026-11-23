@@ -396,6 +396,35 @@ try doing (ausprobieren) – try to do (versuchen)</div>`,
       { t: 'order', de: 'Das Geld wird treuhänderisch verwahrt, bis der Deal abgeschlossen ist.', s: 'The money is held in escrow until the deal is completed.' }
     ]
   }
+  ,{
+    id: 'typical-errors', title: 'Typische Fehler aus dem Alltag', level: 'B1',
+    explain: `
+<p>Fehler, die Deutschsprachigen besonders oft passieren – gesammelt aus deinen eigenen Texten und Fragen.</p>
+<p><b>did / didn't + Grundform</b> – die Vergangenheit steckt schon im <i>did</i>.</p>
+<p class="ex">I <b>didn't see</b> you. · <b>Did</b> you <b>go</b>? (nicht: <s>didn't saw</s>, <s>did you went</s>)</p>
+<p><b>„schon länger nicht“ → Present Perfect</b></p>
+<p class="ex">I <b>haven't seen</b> you for / in a while. · <b>Have</b> you <b>finished</b> your degree?</p>
+<p><b>despite vs. although</b> – nach <i>despite</i> ein Nomen oder -ing, nach <i>although</i> ein ganzer Satz. Kein <s>despite of</s>.</p>
+<p class="ex"><b>Despite</b> the rain … · <b>Although</b> it was raining …</p>
+<p><b>Unzählbare Nomen</b>: furniture, information, advice, news, equipment – kein Plural-s, kein <i>a</i>.</p>
+<p class="ex">The furniture <b>is</b> new. · <b>a piece of</b> advice</p>
+<p><b>borrow vs. lend</b> – borrow = (sich) leihen/nehmen, lend = (jemandem) leihen/geben.</p>
+<p class="ex">Can I <b>borrow</b> your pen? · Can you <b>lend</b> me your pen?</p>`,
+    items: [
+      { t: 'err', s: 'I [didn\'t saw] you at the party.', fix: ['didn\'t see', 'did not see'], ex: 'Nach did/didn\'t steht die Grundform.' },
+      { t: 'mc', q: '___ you go to the meeting yesterday?', o: ['Did', 'Have', 'Were'], a: 0, ex: '„yesterday“ → Simple Past; Frage mit did + Grundform.' },
+      { t: 'gap', q: 'Hey, I ___ (not / see) you in a while!', a: ['haven\'t seen', 'have not seen'], ex: '„in a while“ bis jetzt → Present Perfect.' },
+      { t: 'err', s: 'Are you [finish] with your degree?', fix: ['finished'], ex: 'finished = fertig; oder: Have you finished your degree?' },
+      { t: 'mc', q: '___ the rain, we went for a walk.', o: ['Despite', 'Although', 'Despite of'], a: 0, ex: 'Nach despite folgt ein Nomen; „despite of“ gibt es nicht.' },
+      { t: 'mc', q: '___ it was raining, we went for a walk.', o: ['Although', 'Despite', 'In spite of'], a: 0, ex: 'Ganzer Satz → although.' },
+      { t: 'err', s: 'We bought some new [furnitures] for the flat.', fix: ['furniture'], ex: 'furniture ist unzählbar – kein Plural-s.' },
+      { t: 'mc', q: 'She gave me ___ good advice.', o: ['some', 'a', 'an'], a: 0, ex: 'advice ist unzählbar → some advice / a piece of advice.' },
+      { t: 'mc', q: 'Can you ___ me 20 euros until Friday?', o: ['lend', 'borrow', 'rent'], a: 0, ex: 'lend = jemandem etwas leihen (geben).' },
+      { t: 'mc', q: 'Can I ___ your charger for a minute?', o: ['borrow', 'lend', 'loan'], a: 0, ex: 'borrow = sich etwas leihen (nehmen).' },
+      { t: 'err', s: 'The news [are] good.', fix: ['is'], ex: 'news ist unzählbar und steht im Singular.' },
+      { t: 'order', de: 'Hast du dein Studium schon abgeschlossen?', s: 'Have you finished your degree yet?' }
+    ]
+  }
 ];
 
 /* Startpaket – nützliche Wörter B2/C1. ex enthält das Wort, damit Lückentexte funktionieren. */
@@ -481,5 +510,47 @@ const CHAT_WORDS = [
   ['mitigate', 'mildern, verringern (Risiken)', 'verb', 'Banks hold extra capital to mitigate the risk of losses.'],
   ['moat', 'Wettbewerbsvorteil (wörtl. Burggraben)', 'noun', 'A strong brand can create a competitive moat.'],
   ['be on the hook for', 'haften für, geradestehen müssen für', 'verb', 'Shareholders were on the hook for the cleanup costs.'],
-  ['go rogue', 'außer Kontrolle geraten, eigenmächtig handeln', 'verb', 'What happens if an AI system goes rogue?']
+  ['go rogue', 'außer Kontrolle geraten, eigenmächtig handeln', 'verb', 'What happens if an AI system goes rogue?'],
+  /* Runde 2 (Nov. 2026): Aeon, Gen Z, Psychology Today, Chase */
+  ['ruse', 'List, Trick, Täuschungsmanöver', 'noun', 'The phone call was just a ruse to get her out of the house.'],
+  ['relentless', 'unerbittlich, unablässig, gnadenlos', 'adjective', 'The pressure to perform at work can be relentless.'],
+  ['miserable', 'elend, todunglücklich; miserabel', 'adjective', 'He felt miserable after losing his job.'],
+  ['disturbance', 'Störung, Beeinträchtigung; Unruhe', 'noun', 'Please keep the noise down to avoid any disturbance to the neighbours.'],
+  ['gratifying', 'befriedigend, erfüllend, wohltuend', 'adjective', 'It is gratifying to see your hard work pay off.'],
+  ['contented', 'zufrieden (innerlich, dauerhaft)', 'adjective', 'She seemed happy and contented with her quiet life.'],
+  ['be content to', 'sich (gern) damit begnügen, zufrieden sein mit', 'phrase', 'Many people are content to live a simple life.'],
+  ['extent', 'Ausmaß, Umfang', 'noun', 'Nobody knows the full extent of the damage yet.'],
+  ['pursuit', 'Streben (nach), Verfolgung; Beschäftigung', 'noun', 'The pursuit of happiness is written into the US Declaration of Independence.'],
+  ['widespread', 'weit verbreitet, flächendeckend', 'adjective', 'There is widespread concern about rising rents in big cities.'],
+  ['nonetheless', 'trotzdem, dennoch', 'adverb', 'The plan had flaws; nonetheless, it worked.'],
+  ['subtle', 'subtil, unterschwellig, fein', 'adjective', 'There is a subtle difference between the two words.'],
+  ['arbitrary', 'willkürlich, beliebig', 'adjective', 'The decision seemed completely arbitrary.'],
+  ['inevitably', 'zwangsläufig, unweigerlich', 'adverb', 'Prices will inevitably rise when demand grows.'],
+  ['lack', 'Mangel, Fehlen; fehlen', 'noun', 'The project failed because of a lack of money.'],
+  ['seek', 'suchen, anstreben', 'verb', 'Many young people seek advice online.'],
+  ['threat', 'Bedrohung, Gefahr', 'noun', 'Climate change is a serious threat to coastal cities.'],
+  ['perception', 'Wahrnehmung, Sichtweise', 'noun', 'Social media can distort our perception of reality.'],
+  ['accountability', 'Verantwortung, Rechenschaft(spflicht)', 'noun', 'Managers must take accountability for their decisions.'],
+  ['skew', 'verzerren, verfälschen', 'verb', 'A few extreme values can skew the average.'],
+  ['inaccuracy', 'Ungenauigkeit, Fehler', 'noun', 'The report contains several inaccuracies.'],
+  ['a double-edged sword', 'ein zweischneidiges Schwert', 'phrase', 'Social media is a double-edged sword: it connects people but can also isolate them.'],
+  ['despite', 'trotz', 'preposition', 'Despite the rain, we went for a walk.'],
+  ['contend with', 'zu kämpfen haben mit, sich auseinandersetzen müssen mit', 'verb', 'Households have contended with higher prices and borrowing costs.'],
+  ['borrowing costs', 'Kreditkosten, Finanzierungskosten', 'noun', 'Higher interest rates have pushed up borrowing costs for households.'],
+  ['tied to', 'verbunden mit, abhängig von, gekoppelt an', 'phrase', 'Stocks tied to consumer spending have lagged behind the market.'],
+  ['consumer staples', 'Basiskonsumgüter (Sektor: Güter des täglichen Bedarfs)', 'noun', 'Consumer staples stocks tend to hold up well in a downturn.'],
+  ['staple', 'Grundnahrungsmittel, fester Bestandteil', 'noun', 'Rice is a staple in many Asian countries.'],
+  ['distinction', 'Unterscheidung, Unterschied', 'noun', 'It is important to make a distinction between revenue and profit.'],
+  ['examine', 'untersuchen, prüfen', 'verb', 'The study examines the effect of income on happiness.'],
+  ['merely', 'lediglich, bloß, nur', 'adverb', 'The price increase is merely a short-term effect.'],
+  ['soften', 'abschwächen, nachlassen; mildern', 'verb', 'Demand for new cars has softened this year.'],
+  ['furniture', 'Möbel', 'noun', 'We need to buy some new furniture for the living room.'],
+  ['the latter', 'Letzteres, der/die/das Letztere', 'phrase', 'You can pay by card or in cash; most people prefer the latter.'],
+  ['layer', 'Schicht, Ebene', 'noun', 'The latest figures add another layer to the story.'],
+  ['figure', 'Zahl, Ziffer; Gestalt, Figur', 'noun', 'The latest sales figures look promising.'],
+  ['erase', 'auslöschen, zunichtemachen; radieren', 'verb', 'One bad month does not erase a year of strong growth.'],
+  ['in dollar terms', 'in Dollar gerechnet, nominal', 'phrase', 'Spending rose in dollar terms but was flat after adjusting for inflation.'],
+  ['affluent', 'wohlhabend, gut situiert', 'adjective', 'Affluent households have continued to spend on travel.'],
+  ['hold up', 'stabil bleiben, sich behaupten', 'verb', 'Demand for everyday products tends to hold up well in a downturn.'],
+  ['cushion', 'Polster, Puffer; abfedern', 'noun', 'Savings provide a cushion against unexpected expenses.']
 ];
