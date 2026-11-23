@@ -170,24 +170,43 @@ function findForm(word, sentence) {
 let voicesCache = [];
 function loadVoices() { if ('speechSynthesis' in window) voicesCache = speechSynthesis.getVoices(); }
 if ('speechSynthesis' in window) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+let currentUtterance = null; // Referenz halten – Safari verwirft sonst manchmal die Ausgabe
 function speak(text, rate = 0.95) {
   if (!('speechSynthesis' in window) || !text) return;
-  speechSynthesis.cancel();
+  const synth = window.speechSynthesis;
   const u = new SpeechSynthesisUtterance(text);
   const lang = S.settings.accent;
   u.lang = lang;
-  const vs = voicesCache.length ? voicesCache : speechSynthesis.getVoices();
+  const vs = voicesCache.length ? voicesCache : synth.getVoices();
   const v = vs.find((x) => x.lang.replace('_', '-') === lang && /premium|enhanced|natural/i.test(x.name))
     || vs.find((x) => x.lang.replace('_', '-') === lang)
     || vs.find((x) => x.lang.startsWith('en'));
   if (v) u.voice = v;
   u.rate = rate;
-  speechSynthesis.speak(u);
+  u.volume = 1;
+  currentUtterance = u;
+  const go = () => { try { synth.resume(); } catch (e) {} synth.speak(u); };
+  // Safari-Bug: cancel() direkt vor speak() verschluckt die Ausgabe → kurz warten
+  if (synth.speaking || synth.pending) { synth.cancel(); setTimeout(go, 80); }
+  else go();
 }
+/* iOS gibt Sprachausgabe erst nach der ersten Berührung frei → beim ersten Tippen „aufwecken“ */
+function unlockSpeech() {
+  if (!('speechSynthesis' in window)) return;
+  try {
+    const u = new SpeechSynthesisUtterance(' ');
+    u.volume = 0;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+  document.removeEventListener('touchend', unlockSpeech);
+  document.removeEventListener('click', unlockSpeech);
+}
+document.addEventListener('touchend', unlockSpeech, { once: true });
+document.addEventListener('click', unlockSpeech, { once: true });
 function playWord(v, rate) {
   if (v.audio && navigator.onLine && !rate) {
     const a = new Audio(v.audio);
-    a.play().catch(() => speak(v.en));
+    a.play().catch(() => speak(v.en.replace(/^to /, ''), 0.9));
   } else speak(v.en.replace(/^to /, ''), rate || 0.9);
 }
 
@@ -612,6 +631,7 @@ function renderSettings() {
       <div class="field"><label>Aussprache</label>
         <div class="seg">${[['en-GB', 'Britisch'], ['en-US', 'Amerikanisch']].map(([k, l]) => `<button data-acc="${k}" class="${st.accent === k ? 'on' : ''}">${l}</button>`).join('')}</div>
         <button class="btn ghost small" id="s-test" style="margin-top:6px">${ICON.speaker} Testen</button>
+        <p class="tiny" style="margin-top:4px">Kein Ton? Stummschalter am iPhone ausschalten und Lautstärke prüfen – die Sprachausgabe ist im Lautlos-Modus stumm.</p>
       </div>
       <div class="field"><label>Aufgaben pro Lektion</label>
         <div class="seg">${[8, 12, 16, 20].map((n) => `<button data-len="${n}" class="${st.len === n ? 'on' : ''}">${n}</button>`).join('')}</div></div>
@@ -642,7 +662,7 @@ function renderSettings() {
       ${(S.errors || []).length ? `<button class="btn secondary block" id="s-errors">Fehler ansehen</button>` : ''}
     </div>
     <button class="btn danger block" id="s-reset" style="margin-top:8px">Alles zurücksetzen</button>
-    <p class="tiny" style="text-align:center;margin-top:24px">Wordwise · Version 1.3</p>
+    <p class="tiny" style="text-align:center;margin-top:24px">Wordwise · Version 1.4</p>
   </div>`;
 
   $$('[data-acc]').forEach((b) => b.onclick = () => { st.accent = b.dataset.acc; save(); renderSettings(); });
